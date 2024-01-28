@@ -11,6 +11,15 @@ def get_db():
 
 class URL:
     @staticmethod
+    def find_by_original_url(original_url):
+        db = get_db()
+        result = db.execute('SELECT short_url FROM urls WHERE original_url = ?',
+                            (original_url,)).fetchone()
+        return result[0] if result else None
+    
+    
+    
+    @staticmethod
     def insert_short_url(original_url, short_url):
         db = get_db()
         db.execute('INSERT INTO urls (original_url, short_url) VALUES (?, ?)',
