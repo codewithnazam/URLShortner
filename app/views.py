@@ -39,6 +39,15 @@ def shorten_url():
 def redirect_to_original(short_url):
     original_url = URL.get_original_url(short_url)
     if original_url:
+        URL.increment_visit_count(short_url)  # Increment visit count
         return redirect(original_url)
     else:
         return "URL not found", 404
+
+@shortener.route('/visits/<short_url>', methods=['GET'])
+def get_visit_count(short_url):
+    visit_count = URL.get_visit_count(short_url)
+    if visit_count is not None:
+        return jsonify({'short_url': short_url, 'visit_count': visit_count})
+    else:
+        return jsonify({'error': 'Short URL not found'}), 404

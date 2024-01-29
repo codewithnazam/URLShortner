@@ -32,3 +32,17 @@ class URL:
         result = db.execute('SELECT original_url FROM urls WHERE short_url = ?',
                             (short_url,)).fetchone()
         return result[0] if result else None
+
+    @staticmethod
+    def increment_visit_count(short_url):
+        db = get_db()
+        db.execute('UPDATE urls SET visit_count = visit_count + 1 WHERE short_url = ?',
+                   (short_url,))
+        db.commit()
+        
+    @staticmethod
+    def get_visit_count(short_url):
+        db = get_db()
+        result = db.execute('SELECT visit_count FROM urls WHERE short_url = ?',
+                            (short_url,)).fetchone()
+        return result[0] if result else None
