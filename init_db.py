@@ -14,7 +14,7 @@ def create_table():
         )
     ''')
 
-    # Optionally, check if the visit_count column exists and add it if it doesn't
+    # Add visit_count column if it doesn't exist
     cursor.execute('''
         PRAGMA table_info(urls)
     ''')
@@ -23,6 +23,20 @@ def create_table():
         cursor.execute('''
             ALTER TABLE urls
             ADD COLUMN visit_count INTEGER DEFAULT 0
+        ''')
+
+    # Add expiration_date column if it doesn't exist
+    if 'expiration_date' not in columns:
+        cursor.execute('''
+            ALTER TABLE urls
+            ADD COLUMN expiration_date DATETIME
+        ''')
+
+    # Add max_uses column if it doesn't exist
+    if 'max_uses' not in columns:
+        cursor.execute('''
+            ALTER TABLE urls
+            ADD COLUMN max_uses INTEGER
         ''')
 
     conn.commit()
