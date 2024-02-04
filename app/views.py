@@ -65,3 +65,57 @@ def get_visit_count(short_url):
         return jsonify({'error': 'Short URL not found'}), 404
     
 
+@shortener.route('/update/url', methods=['POST'])
+def update_short_url():
+    data = request.json
+    original_short_url = data.get('original_short_url')
+    new_short_url = data.get('new_short_url')
+
+    # Validate input
+    if not original_short_url or not new_short_url:
+        return jsonify({'error': 'Missing original or new short URL'}), 400
+
+    # Check if the new short URL is already taken
+    if URL.get_original_url(new_short_url):
+        return jsonify({'error': 'Please provide a unique short URL'}), 409
+
+    # Proceed with the update if the new short URL is unique
+    success = URL.update_short_url(original_short_url, new_short_url)
+    if success:
+        return jsonify({'message': 'Short URL updated successfully'})
+    else:
+        return jsonify({'error': 'Original short URL not found'}), 404
+
+@shortener.route('/update/settings', methods=['POST'])
+def update_url_settings():
+    data = request.json
+    short_url = data.get('short_url')
+    expiration_days = data.get('expiration_days')
+    max_uses = data.get('max_uses')
+
+    if not short_url:
+        return jsonify({'error': 'Short URL is required'}), 400
+
+    # Convert expiration_days to an actual date, if provided
+    expiration_date = None
+    if expiration_days is not None:
+        try:
+            expiration_days = int(expiration_days)
+            expiration_date = (datetime.now() + timedelta(days=expiration_days)).isoformat()
+        except ValueError:
+            return jsonify({'error': 'Invalid expiration days format'}), 400
+
+    # Assuming update_url_details can handle None values to keep existing settings
+    success = URL.update_url_details(short_url, expiration_date, max_uses)
+    if success:
+        return jsonify({'message': 'URL settings updated successfully'})
+    else:
+        return jsonify({'error': 'Failed to update URL settings or URL not found'}), 404
+
+@shortener.route('/details/<short_url>', methods=['GET'])
+def get_url_details(short_url):
+    details = URL.get_url_details(short_url)
+    if details:
+        return jsonify(details)
+    else:
+        return jsonify({'error': 'Short URL not found'}), 404
